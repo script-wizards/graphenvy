@@ -92,18 +92,19 @@
         @media (max-width: 768px) {
             body {
                 padding: 20px 10px;
-                overflow: hidden;
-                height: 100vh;
+                overflow-y: auto;
+                height: auto;
+                min-height: 100vh;
             }
             
             .content {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                padding: 0 10px;
-                max-height: 85vh;
-                overflow: hidden;
+                position: relative;
+                top: auto;
+                left: auto;
+                transform: none;
+                padding: 40px 10px;
+                max-height: none;
+                overflow: visible;
             }
             
             h1 {
