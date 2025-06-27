@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraphEnvy</title>
+    <title>graph envy</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         
         * {
             margin: 0;
@@ -14,18 +14,16 @@
         }
         
         body {
-            background: #000;
-            color: #fff;
-            font-family: 'Courier Prime', monospace;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #2a2a2a;
+            color: #f5f5f0;
+            font-family: 'Crimson Text', serif;
             height: 100vh;
-            flex-direction: column;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
         }
         
-        #constellation-canvas {
+        #neural-canvas {
             position: fixed;
             top: 0;
             left: 0;
@@ -35,33 +33,71 @@
         }
         
         .content {
-            position: relative;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 1;
             text-align: center;
             padding: 0 20px;
-            max-width: 100vw;
             box-sizing: border-box;
         }
         
         h1 {
-            font-size: clamp(2rem, 8vw, 4rem);
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(0, 235, 155, 0.3);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: lowercase;
+            text-shadow: 0 0 30px rgba(245, 245, 240, 0.3);
             word-break: keep-all;
             overflow-wrap: normal;
+            text-align: left;
+            max-width: min(65ch, 85vw);
+            margin: 0 auto 2rem auto;
         }
         
         .tagline {
-            font-size: clamp(0.9rem, 4vw, 1.2rem);
+            font-size: clamp(1rem, 4vw, 1.4rem);
             font-weight: 400;
-            letter-spacing: 0.05em;
-            text-transform: lowercase;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            max-width: 90vw;
+            letter-spacing: 0.01em;
+            opacity: 0.85;
+            max-width: min(65ch, 85vw);
             margin: 0 auto;
+            line-height: 1.4;
+            text-align: left;
+        }
+        
+        .headword {
+            margin-bottom: 0.5rem;
+        }
+        
+        .definition {
+            transition: opacity 1.5s ease-in-out;
+            min-height: 7em;
+            display: block;
+        }
+        
+        .definition.fading {
+            opacity: 0;
+        }
+        
+        .pronunciation {
+            font-weight: 400;
+            font-style: normal;
+            opacity: 0.7;
+            margin: 0 0.5em;
+        }
+        
+        .constellation-link {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px dotted rgba(245, 245, 240, 0.4);
+            transition: border-bottom-color 0.3s ease;
+        }
+        
+        .constellation-link:hover {
+            color: rgba(255, 162, 39, 0.8);
+            border-bottom-color: rgba(255, 162, 39, 0.8);
         }
         
         @media (max-width: 768px) {
@@ -74,48 +110,80 @@
             }
             
             h1 {
-                letter-spacing: 0.05em;
-                margin-bottom: 0.8rem;
+                margin-bottom: 1.5rem;
             }
             
             .tagline {
-                letter-spacing: 0.02em;
                 line-height: 1.3;
             }
+            
+            .definition {
+                min-height: 8em;
+            }
+        }
+        
+        .credit {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            opacity: 0.3;
+            z-index: 2;
+        }
+        
+        .credit a {
+            color: #f5f5f0;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .credit a:hover {
+            opacity: 1;
         }
         
         @media (max-width: 480px) {
             h1 {
-                letter-spacing: 0.02em;
-                margin-bottom: 0.6rem;
+                margin-bottom: 1rem;
             }
             
-            .tagline {
-                font-size: clamp(0.8rem, 3.5vw, 1rem);
-                letter-spacing: 0.01em;
+            .credit {
+                bottom: 15px;
+                font-size: 0.6rem;
             }
+            
+
         }
     </style>
 </head>
 <body>
-    <canvas id="constellation-canvas"></canvas>
+    <canvas id="neural-canvas"></canvas>
     <div class="content">
-        <h1>graphenvy</h1>
-        <div class="tagline">these graphs are better than your graphs</div>
+        <h1>graph envy</h1>
+        <div class="tagline">
+            <div class="headword"><strong>graph en·vy</strong> <span class="pronunciation">/ˈɡræf ˈɛnvi/</span> <em>n.</em></div>
+            <div class="definition" id="definition-text"></div>
+        </div>
+    </div>
+    
+    <div class="credit">
+        <a href="https://scriptwizards.org/" target="_blank">© Script Wizards</a>
     </div>
 
     <script>
-        class ConstellationBackground {
+        class NeuralNetworkBackground {
             constructor() {
-                this.canvas = document.getElementById('constellation-canvas');
+                this.canvas = document.getElementById('neural-canvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.stars = [];
+                this.nodes = [];
                 this.connections = [];
-                this.maxDistance = 150;
-                this.numStars = this.isMobile() ? 80 : 120;
+                this.ambientParticles = [];
+                this.maxNodes = this.isMobile() ? 60 : 85;
+                this.maxAmbientParticles = this.isMobile() ? 40 : 60;
+                this.connectionDistance = this.isMobile() ? 140 : 180;
+                this.animationFrameRef = null;
                 
                 this.resize();
-                this.createStars();
                 this.animate();
                 
                 window.addEventListener('resize', () => this.resize());
@@ -130,71 +198,172 @@
                 this.canvas.height = window.innerHeight;
             }
             
-            createStars() {
-                this.stars = [];
-                for (let i = 0; i < this.numStars; i++) {
-                    this.stars.push({
-                        x: Math.random() * this.canvas.width,
-                        y: Math.random() * this.canvas.height,
-                        vx: (Math.random() - 0.5) * 0.5,
-                        vy: (Math.random() - 0.5) * 0.5,
-                        size: Math.random() * 3 + 1,
-                        opacity: Math.random() * 0.8 + 0.2,
-                        twinkle: Math.random() * Math.PI * 2,
-                        twinkleSpeed: Math.random() * 0.02 + 0.01,
-                        color: this.getStarColor()
-                    });
-                }
+            random(min, max) {
+                return Math.random() * (max - min) + min;
             }
             
-            getStarColor() {
-                const rand = Math.random();
+            distance(x1, y1, x2, y2) {
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            createNode() {
+                return {
+                    x: this.random(50, this.canvas.width - 50),
+                    y: this.random(50, this.canvas.height - 50),
+                    vx: this.random(-0.2, 0.2),
+                    vy: this.random(-0.2, 0.2),
+                    size: this.random(2, 4),
+                    opacity: 0,
+                    targetOpacity: this.random(0.6, 1),
+                    life: this.random(3000, 8000), // milliseconds
+                    maxLife: 0,
+                    pulsePhase: this.random(0, Math.PI * 2),
+                    pulseSpeed: this.random(0.01, 0.025),
+                    isActive: true
+                };
+            }
+            
+            createAmbientParticle() {
+                return {
+                    x: this.random(0, this.canvas.width),
+                    y: this.random(0, this.canvas.height),
+                    vx: this.random(-0.1, 0.1),
+                    vy: this.random(-0.1, 0.1),
+                    size: this.random(0.5, 1.5),
+                    opacity: 0,
+                    targetOpacity: this.random(0.1, 0.3),
+                    life: this.random(5000, 12000),
+                    maxLife: 0,
+                    twinkle: this.random(0, Math.PI * 2),
+                    twinkleSpeed: this.random(0.005, 0.015)
+                };
+            }
+            
+            updateNodes() {
+                const currentTime = Date.now();
                 
-                if (rand < 0.75) {
-                    const whites = ['#ffffff', '#fbf8ff', '#fff4e8', '#f0f0f0', '#cad8ff'];
-                    return whites[Math.floor(Math.random() * whites.length)];
-                } else if (rand < 0.85) {
-                    return '#ffcc6f';
-                } else if (rand < 0.93) {
-                    const blues = ['#9bb2ff', '#aabfff'];
-                    return blues[Math.floor(Math.random() * blues.length)];
-                } else if (rand < 0.98) {
-                    return '#ffad4f';
-                } else {
-                    const reds = ['#ff6a00', '#ff4500'];
-                    return reds[Math.floor(Math.random() * reds.length)];
+                // Remove dead nodes
+                this.nodes = this.nodes.filter(node => {
+                    if (!node.birthTime) node.birthTime = currentTime;
+                    if (!node.maxLife) node.maxLife = node.life;
+                    
+                    const age = currentTime - node.birthTime;
+                    const lifeRatio = age / node.maxLife;
+                    
+                    if (lifeRatio > 1) {
+                        return false; // Node dies
+                    }
+                    
+                    // Fade in/out logic
+                    if (lifeRatio < 0.1) {
+                        node.opacity = Math.min(node.opacity + 0.02, node.targetOpacity * (lifeRatio / 0.1));
+                    } else if (lifeRatio > 0.8) {
+                        const fadeRatio = (lifeRatio - 0.8) / 0.2;
+                        node.opacity = node.targetOpacity * (1 - fadeRatio);
+                    } else {
+                        node.opacity = Math.min(node.opacity + 0.02, node.targetOpacity);
+                    }
+                    
+                    return true;
+                });
+                
+                // Add new nodes stochastically
+                if (this.nodes.length < this.maxNodes && Math.random() < 0.025) {
+                    this.nodes.push(this.createNode());
                 }
-            }
-            
-            updateStars() {
-                this.stars.forEach(star => {
-                    star.x += star.vx;
-                    star.y += star.vy;
+                
+                // Update node positions and pulse
+                this.nodes.forEach(node => {
+                    node.x += node.vx;
+                    node.y += node.vy;
                     
-                    if (star.x < 0) star.x = this.canvas.width;
-                    if (star.x > this.canvas.width) star.x = 0;
-                    if (star.y < 0) star.y = this.canvas.height;
-                    if (star.y > this.canvas.height) star.y = 0;
+                    // Gentle boundary reflection
+                    if (node.x < 20 || node.x > this.canvas.width - 20) {
+                        node.vx *= -0.8;
+                        node.x = Math.max(20, Math.min(this.canvas.width - 20, node.x));
+                    }
+                    if (node.y < 20 || node.y > this.canvas.height - 20) {
+                        node.vy *= -0.8;
+                        node.y = Math.max(20, Math.min(this.canvas.height - 20, node.y));
+                    }
                     
-                    star.twinkle += star.twinkleSpeed;
+                    node.pulsePhase += node.pulseSpeed;
                 });
             }
             
-            findConnections() {
+            updateAmbientParticles() {
+                const currentTime = Date.now();
+                
+                // Remove dead ambient particles
+                this.ambientParticles = this.ambientParticles.filter(particle => {
+                    if (!particle.birthTime) particle.birthTime = currentTime;
+                    if (!particle.maxLife) particle.maxLife = particle.life;
+                    
+                    const age = currentTime - particle.birthTime;
+                    const lifeRatio = age / particle.maxLife;
+                    
+                    if (lifeRatio > 1) {
+                        return false;
+                    }
+                    
+                    // Fade in/out logic
+                    if (lifeRatio < 0.2) {
+                        particle.opacity = Math.min(particle.opacity + 0.01, particle.targetOpacity * (lifeRatio / 0.2));
+                    } else if (lifeRatio > 0.7) {
+                        const fadeRatio = (lifeRatio - 0.7) / 0.3;
+                        particle.opacity = particle.targetOpacity * (1 - fadeRatio);
+                    } else {
+                        particle.opacity = Math.min(particle.opacity + 0.01, particle.targetOpacity);
+                    }
+                    
+                    return true;
+                });
+                
+                // Add new ambient particles
+                if (this.ambientParticles.length < this.maxAmbientParticles && Math.random() < 0.02) {
+                    this.ambientParticles.push(this.createAmbientParticle());
+                }
+                
+                // Update ambient particle positions
+                this.ambientParticles.forEach(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    // Wrap around screen edges
+                    if (particle.x < 0) particle.x = this.canvas.width;
+                    if (particle.x > this.canvas.width) particle.x = 0;
+                    if (particle.y < 0) particle.y = this.canvas.height;
+                    if (particle.y > this.canvas.height) particle.y = 0;
+                    
+                    particle.twinkle += particle.twinkleSpeed;
+                });
+            }
+            
+            updateConnections() {
                 this.connections = [];
-                for (let i = 0; i < this.stars.length; i++) {
-                    for (let j = i + 1; j < this.stars.length; j++) {
-                        const dx = this.stars[i].x - this.stars[j].x;
-                        const dy = this.stars[i].y - this.stars[j].y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                for (let i = 0; i < this.nodes.length; i++) {
+                    for (let j = i + 1; j < this.nodes.length; j++) {
+                        const node1 = this.nodes[i];
+                        const node2 = this.nodes[j];
+                        const dist = this.distance(node1.x, node1.y, node2.x, node2.y);
                         
-                        if (distance < this.maxDistance) {
-                            this.connections.push({
-                                star1: this.stars[i],
-                                star2: this.stars[j],
-                                distance: distance,
-                                opacity: (1 - distance / this.maxDistance) * 0.3
-                            });
+                        if (dist < this.connectionDistance) {
+                            const strength = 1 - (dist / this.connectionDistance);
+                                                         const opacity = Math.min(node1.opacity, node2.opacity) * strength * 0.6;
+                            
+                            // Stochastic connection formation
+                            if (Math.random() < 0.7) {
+                                this.connections.push({
+                                    node1,
+                                    node2,
+                                    opacity,
+                                    strength,
+                                    pulseOffset: Math.random() * Math.PI * 2
+                                });
+                            }
                         }
                     }
                 }
@@ -202,59 +371,128 @@
             
             drawConnections() {
                 this.connections.forEach(connection => {
-                    const intensity = 1 - (connection.distance / this.maxDistance);
-                    const lineWidth = 0.5 + (intensity * 1.5);
-                    const alpha = 0.4 + (intensity * 0.6);
+                    const { node1, node2, opacity, strength, pulseOffset } = connection;
+                    
+                                         // Dynamic line properties
+                     const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + pulseOffset);
+                     const lineWidth = 1 + strength * 2.5 * pulse;
+                     const alpha = opacity * (0.8 + 0.5 * pulse);
                     
                     this.ctx.beginPath();
-                    this.ctx.strokeStyle = `rgba(135, 206, 250, ${alpha})`;
+                    this.ctx.strokeStyle = `rgba(245, 245, 240, ${alpha})`;
                     this.ctx.lineWidth = lineWidth;
-                    this.ctx.moveTo(connection.star1.x, connection.star1.y);
-                    this.ctx.lineTo(connection.star2.x, connection.star2.y);
+                    this.ctx.moveTo(node1.x, node1.y);
+                    this.ctx.lineTo(node2.x, node2.y);
                     this.ctx.stroke();
                     
-                    if (connection.distance < this.maxDistance * 0.6) {
+                    // Synaptic spark effect for strong connections
+                    if (strength > 0.7 && Math.random() < 0.05) {
+                        const midX = (node1.x + node2.x) / 2;
+                        const midY = (node1.y + node2.y) / 2;
+                        
                         this.ctx.beginPath();
-                        this.ctx.strokeStyle = `rgba(173, 216, 230, ${alpha * 0.5})`;
-                        this.ctx.lineWidth = lineWidth + 1.5;
-                        this.ctx.moveTo(connection.star1.x, connection.star1.y);
-                        this.ctx.lineTo(connection.star2.x, connection.star2.y);
+                        this.ctx.fillStyle = `rgba(245, 245, 240, ${alpha * 2})`;
+                        this.ctx.arc(midX, midY, 1, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+            }
+            
+            drawNodes() {
+                this.nodes.forEach(node => {
+                    const pulse = 0.7 + 0.3 * Math.sin(node.pulsePhase);
+                    const currentSize = node.size * pulse;
+                    
+                    // Main node body
+                    this.ctx.beginPath();
+                    this.ctx.fillStyle = `rgba(245, 245, 240, ${node.opacity})`;
+                    this.ctx.arc(node.x, node.y, currentSize, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Subtle glow
+                    this.ctx.beginPath();
+                    this.ctx.fillStyle = `rgba(245, 245, 240, ${node.opacity * 0.2})`;
+                    this.ctx.arc(node.x, node.y, currentSize * 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Activity spike for highly connected nodes
+                    const connectionCount = this.connections.filter(c => 
+                        c.node1 === node || c.node2 === node
+                    ).length;
+                    
+                    if (connectionCount > 3 && Math.random() < 0.02) {
+                        this.ctx.beginPath();
+                        this.ctx.strokeStyle = `rgba(245, 245, 240, ${node.opacity * 0.8})`;
+                        this.ctx.lineWidth = 1;
+                        this.ctx.arc(node.x, node.y, currentSize * 3, 0, Math.PI * 2);
                         this.ctx.stroke();
                     }
                 });
             }
             
-            drawStars() {
-                this.stars.forEach(star => {
-                    const twinkleOpacity = star.opacity * (0.5 + 0.5 * Math.sin(star.twinkle));
+            drawAmbientParticles() {
+                this.ambientParticles.forEach(particle => {
+                    const twinkleOpacity = particle.opacity * (0.5 + 0.5 * Math.sin(particle.twinkle));
                     
                     this.ctx.beginPath();
-                    this.ctx.fillStyle = star.color.replace(')', `, ${twinkleOpacity})`).replace('rgb', 'rgba');
-                    this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    this.ctx.beginPath();
-                    this.ctx.fillStyle = star.color.replace(')', `, ${twinkleOpacity * 0.3})`).replace('rgb', 'rgba');
-                    this.ctx.arc(star.x, star.y, star.size * 2, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(245, 245, 240, ${twinkleOpacity})`;
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
                     this.ctx.fill();
                 });
             }
             
             animate() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                // Clear canvas completely
+                this.ctx.fillStyle = '#2a2a2a';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 
-                this.updateStars();
-                this.findConnections();
+                this.updateAmbientParticles();
+                this.updateNodes();
+                this.updateConnections();
+                this.drawAmbientParticles();
                 this.drawConnections();
-                this.drawStars();
+                this.drawNodes();
                 
-                requestAnimationFrame(() => this.animate());
+                this.animationFrameRef = requestAnimationFrame(() => this.animate());
             }
         }
         
+        class DefinitionCycler {
+            constructor() {
+                this.definitions = [
+                    "the moment you realize someone else's mind works better than yours—that their thoughts connect in ways yours don't, forming <a href=\"mailto:hello@scriptwizards.org\" class=\"constellation-link\">patterns you can't quite see</a>, leaving you to wonder if intelligence is just having more dots or knowing how to draw the lines between them.",
+                    "the moment you glimpse the framework of someone else's understanding and realize your own thoughts move in smaller, simpler patterns—leaving you to wonder whether intelligence is a matter of having more connections or just knowing <a href=\"mailto:hello@scriptwizards.org\" class=\"constellation-link\">which ones to make</a>.",
+                    "the quiet recognition that someone else's mind operates in dimensions you can't quite access, where ideas link in ways that seem obvious only after they're <a href=\"mailto:hello@scriptwizards.org\" class=\"constellation-link\">pointed out to you</a>.",
+                    "the unsettling realization that while you're still connecting the dots, someone else has already seen the whole <a href=\"mailto:hello@scriptwizards.org\" class=\"constellation-link\">constellation</a>."
+                ];
+                this.currentIndex = 0;
+                this.definitionElement = document.getElementById('definition-text');
+                this.definitionElement.innerHTML = this.definitions[this.currentIndex];
+                this.startCycling();
+            }
+            
+            startCycling() {
+                setInterval(() => {
+                    this.fadeToNext();
+                }, 12000); // Change every 12 seconds
+            }
+            
+            fadeToNext() {
+                this.definitionElement.classList.add('fading');
+                
+                setTimeout(() => {
+                    this.currentIndex = (this.currentIndex + 1) % this.definitions.length;
+                    this.definitionElement.innerHTML = this.definitions[this.currentIndex];
+                    
+                    // Immediate fade in for snappy appearance
+                    this.definitionElement.classList.remove('fading');
+                }, 1500); // Wait for complete fade out (full transition duration)
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            new ConstellationBackground();
+            new NeuralNetworkBackground();
+            new DefinitionCycler();
         });
     </script>
 </body>
