@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>graph envy</title>
+    <title>about – graph envy</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         
@@ -41,10 +41,12 @@
             text-align: center;
             padding: 0 20px;
             box-sizing: border-box;
+            max-height: 85vh;
+            overflow: hidden;
         }
         
         h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-size: clamp(2rem, 6vw, 3.5rem);
             font-weight: 600;
             letter-spacing: 0.02em;
             text-transform: lowercase;
@@ -52,50 +54,37 @@
             word-break: keep-all;
             overflow-wrap: normal;
             text-align: left;
-            max-width: min(65ch, 85vw);
+            max-width: min(75ch, 85vw);
             margin: 0 auto 2rem auto;
         }
         
-        .tagline {
-            font-size: clamp(1rem, 4vw, 1.4rem);
+        .about-content {
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
             font-weight: 400;
             letter-spacing: 0.01em;
-            opacity: 0.85;
-            max-width: min(65ch, 85vw);
+            opacity: 0.9;
+            max-width: min(75ch, 85vw);
             margin: 0 auto;
-            line-height: 1.4;
+            line-height: 1.5;
             text-align: left;
         }
         
-        .headword {
-            margin-bottom: 0.5rem;
+        .about-content p {
+            margin-bottom: 1.2rem;
         }
         
-        .definition {
-            transition: opacity 1.5s ease-in-out;
-            min-height: 7em;
-            display: block;
+        .about-content p:last-child {
+            margin-bottom: 0;
         }
         
-        .definition.fading {
-            opacity: 0;
-        }
-        
-        .pronunciation {
-            font-weight: 400;
-            font-style: normal;
-            opacity: 0.7;
-            margin: 0 0.5em;
-        }
-        
-        .constellation-link {
+        .contact-link {
             color: inherit;
             text-decoration: none;
             border-bottom: 1px dotted rgba(245, 245, 240, 0.4);
-            transition: border-bottom-color 0.3s ease;
+            transition: all 0.3s ease;
         }
         
-        .constellation-link:hover {
+        .contact-link:hover {
             color: rgba(255, 162, 39, 0.8);
             border-bottom-color: rgba(255, 162, 39, 0.8);
         }
@@ -103,22 +92,30 @@
         @media (max-width: 768px) {
             body {
                 padding: 20px 10px;
+                overflow: hidden;
+                height: 100vh;
             }
             
             .content {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
                 padding: 0 10px;
+                max-height: 85vh;
+                overflow: hidden;
             }
             
             h1 {
-                margin-bottom: 1.5rem;
+                margin-bottom: 1rem;
             }
             
-            .tagline {
-                line-height: 1.3;
+            .about-content {
+                line-height: 1.4;
             }
             
-            .definition {
-                min-height: 8em;
+            .about-content p {
+                margin-bottom: 1rem;
             }
         }
         
@@ -151,18 +148,25 @@
                 bottom: 15px;
                 font-size: 0.6rem;
             }
-            
-
         }
     </style>
 </head>
 <body>
     <canvas id="neural-canvas"></canvas>
     <div class="content">
-        <h1>graph envy</h1>
-        <div class="tagline">
-            <div class="headword"><strong>graph en·vy</strong> <span class="pronunciation">/ˈɡræf ˈɛnvi/</span> <em>n.</em></div>
-            <div class="definition" id="definition-text"></div>
+        <h1>about</h1>
+        <div class="about-content">
+            <p>You know that feeling when someone else just <em>gets it</em> in ways you don't? When they see patterns that are invisible to you? That's not a character flaw—that's a network problem. The systems that determine whether you get the job, find decent therapy, or escape your student debt operate through hidden architectures. Some people have maps. Most of us are wandering around blind.</p>
+            
+            <p>We apply graph theory and AI systems to real human problems—not enterprise optimization or vanity metrics. The same mathematical frameworks that power billion-dollar companies, deployed for people trying to navigate actual life systems.</p>
+            
+            <p>Meanwhile, the most sophisticated analytical tools in human history optimize ad clicks while regular people can't figure out why their rent keeps rising, why good jobs seem invite-only, or why some people effortlessly build social circles while others stay isolated. Advanced AI can predict market crashes but somehow can't help you understand the hidden mechanics of your own life.</p>
+            
+            <p>Every complex system has discoverable patterns. Social networks, job markets, healthcare access, housing costs—they all operate according to principles that can be mapped, understood, and navigated. The gap isn't access to information. It's access to the right analytical frameworks. Network intelligence for everyone, not just the people who already have it.</p>
+            
+            <p>Life runs on hidden networks. We build the maps.</p>
+            
+            <p>Think you've found something worth mapping? <a href="mailto:hello@scriptwizards.org" class="contact-link">Let's talk</a>.</p>
         </div>
     </div>
     
@@ -217,7 +221,7 @@
                     size: this.random(2, 4),
                     opacity: 0,
                     targetOpacity: this.random(0.6, 1),
-                    life: this.random(3000, 8000), // milliseconds
+                    life: this.random(3000, 8000),
                     maxLife: 0,
                     pulsePhase: this.random(0, Math.PI * 2),
                     pulseSpeed: this.random(0.01, 0.025),
@@ -244,7 +248,6 @@
             updateNodes() {
                 const currentTime = Date.now();
                 
-                // Remove dead nodes
                 this.nodes = this.nodes.filter(node => {
                     if (!node.birthTime) node.birthTime = currentTime;
                     if (!node.maxLife) node.maxLife = node.life;
@@ -253,10 +256,9 @@
                     const lifeRatio = age / node.maxLife;
                     
                     if (lifeRatio > 1) {
-                        return false; // Node dies
+                        return false;
                     }
                     
-                    // Fade in/out logic
                     if (lifeRatio < 0.1) {
                         node.opacity = Math.min(node.opacity + 0.02, node.targetOpacity * (lifeRatio / 0.1));
                     } else if (lifeRatio > 0.8) {
@@ -269,17 +271,14 @@
                     return true;
                 });
                 
-                // Add new nodes stochastically
                 if (this.nodes.length < this.maxNodes && Math.random() < 0.025) {
                     this.nodes.push(this.createNode());
                 }
                 
-                // Update node positions and pulse
                 this.nodes.forEach(node => {
                     node.x += node.vx;
                     node.y += node.vy;
                     
-                    // Gentle boundary reflection
                     if (node.x < 20 || node.x > this.canvas.width - 20) {
                         node.vx *= -0.8;
                         node.x = Math.max(20, Math.min(this.canvas.width - 20, node.x));
@@ -296,7 +295,6 @@
             updateAmbientParticles() {
                 const currentTime = Date.now();
                 
-                // Remove dead ambient particles
                 this.ambientParticles = this.ambientParticles.filter(particle => {
                     if (!particle.birthTime) particle.birthTime = currentTime;
                     if (!particle.maxLife) particle.maxLife = particle.life;
@@ -308,7 +306,6 @@
                         return false;
                     }
                     
-                    // Fade in/out logic
                     if (lifeRatio < 0.2) {
                         particle.opacity = Math.min(particle.opacity + 0.01, particle.targetOpacity * (lifeRatio / 0.2));
                     } else if (lifeRatio > 0.7) {
@@ -321,17 +318,14 @@
                     return true;
                 });
                 
-                // Add new ambient particles
                 if (this.ambientParticles.length < this.maxAmbientParticles && Math.random() < 0.02) {
                     this.ambientParticles.push(this.createAmbientParticle());
                 }
                 
-                // Update ambient particle positions
                 this.ambientParticles.forEach(particle => {
                     particle.x += particle.vx;
                     particle.y += particle.vy;
                     
-                    // Wrap around screen edges
                     if (particle.x < 0) particle.x = this.canvas.width;
                     if (particle.x > this.canvas.width) particle.x = 0;
                     if (particle.y < 0) particle.y = this.canvas.height;
@@ -352,9 +346,8 @@
                         
                         if (dist < this.connectionDistance) {
                             const strength = 1 - (dist / this.connectionDistance);
-                                                         const opacity = Math.min(node1.opacity, node2.opacity) * strength * 0.6;
+                            const opacity = Math.min(node1.opacity, node2.opacity) * strength * 0.6;
                             
-                            // Stochastic connection formation
                             if (Math.random() < 0.7) {
                                 this.connections.push({
                                     node1,
@@ -373,10 +366,9 @@
                 this.connections.forEach(connection => {
                     const { node1, node2, opacity, strength, pulseOffset } = connection;
                     
-                                         // Dynamic line properties
-                     const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + pulseOffset);
-                     const lineWidth = 1 + strength * 2.5 * pulse;
-                     const alpha = opacity * (0.8 + 0.5 * pulse);
+                    const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + pulseOffset);
+                    const lineWidth = 1 + strength * 2.5 * pulse;
+                    const alpha = opacity * (0.8 + 0.5 * pulse);
                     
                     this.ctx.beginPath();
                     this.ctx.strokeStyle = `rgba(245, 245, 240, ${alpha})`;
@@ -385,7 +377,6 @@
                     this.ctx.lineTo(node2.x, node2.y);
                     this.ctx.stroke();
                     
-                    // Synaptic spark effect for strong connections
                     if (strength > 0.7 && Math.random() < 0.05) {
                         const midX = (node1.x + node2.x) / 2;
                         const midY = (node1.y + node2.y) / 2;
@@ -403,19 +394,16 @@
                     const pulse = 0.7 + 0.3 * Math.sin(node.pulsePhase);
                     const currentSize = node.size * pulse;
                     
-                    // Main node body
                     this.ctx.beginPath();
                     this.ctx.fillStyle = `rgba(245, 245, 240, ${node.opacity})`;
                     this.ctx.arc(node.x, node.y, currentSize, 0, Math.PI * 2);
                     this.ctx.fill();
                     
-                    // Subtle glow
                     this.ctx.beginPath();
                     this.ctx.fillStyle = `rgba(245, 245, 240, ${node.opacity * 0.2})`;
                     this.ctx.arc(node.x, node.y, currentSize * 2, 0, Math.PI * 2);
                     this.ctx.fill();
                     
-                    // Activity spike for highly connected nodes
                     const connectionCount = this.connections.filter(c => 
                         c.node1 === node || c.node2 === node
                     ).length;
@@ -442,7 +430,6 @@
             }
             
             animate() {
-                // Clear canvas completely
                 this.ctx.fillStyle = '#2a2a2a';
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 
@@ -456,44 +443,10 @@
                 this.animationFrameRef = requestAnimationFrame(() => this.animate());
             }
         }
-        
-        class DefinitionCycler {
-            constructor() {
-                this.definitions = [
-                    "the moment you realize someone else's mind works better than yours—that their thoughts connect in ways yours don't, forming <a href=\"/about.html\" class=\"constellation-link\">patterns you can't quite see</a>, leaving you to wonder if intelligence is just having more dots or knowing how to draw the lines between them.",
-                    "the moment you glimpse the framework of someone else's understanding and realize your own thoughts move in smaller, simpler patterns—leaving you to wonder whether intelligence is a matter of having more connections or just knowing <a href=\"/about.html\" class=\"constellation-link\">which ones to make</a>.",
-                    "the quiet recognition that someone else's mind operates in dimensions you can't quite access, where ideas link in ways that seem obvious only after they're <a href=\"/about.html\" class=\"constellation-link\">pointed out to you</a>.",
-                    "the unsettling realization that while you're still connecting the dots, someone else has already seen the whole <a href=\"/about.html\" class=\"constellation-link\">constellation</a>."
-                ];
-                this.currentIndex = 0;
-                this.definitionElement = document.getElementById('definition-text');
-                this.definitionElement.innerHTML = this.definitions[this.currentIndex];
-                this.startCycling();
-            }
-            
-            startCycling() {
-                setInterval(() => {
-                    this.fadeToNext();
-                }, 12000); // Change every 12 seconds
-            }
-            
-            fadeToNext() {
-                this.definitionElement.classList.add('fading');
-                
-                setTimeout(() => {
-                    this.currentIndex = (this.currentIndex + 1) % this.definitions.length;
-                    this.definitionElement.innerHTML = this.definitions[this.currentIndex];
-                    
-                    // Immediate fade in for snappy appearance
-                    this.definitionElement.classList.remove('fading');
-                }, 1500); // Wait for complete fade out (full transition duration)
-            }
-        }
 
         document.addEventListener('DOMContentLoaded', () => {
             new NeuralNetworkBackground();
-            new DefinitionCycler();
         });
     </script>
 </body>
-</html>
+</html> 
